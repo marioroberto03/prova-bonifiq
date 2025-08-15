@@ -12,30 +12,25 @@ namespace ProvaPub.Services
             _ctx = ctx;
         }
 
-        public async Task<Order> PayOrder(string paymentMethod, decimal paymentValue, int customerId)
+        public async Task<Order> PayOrder(PaymentBase payment, decimal paymentValue, int customerId)
 		{
-			if (paymentMethod == "pix")
-			{
-				//Faz pagamento...
-			}
-			else if (paymentMethod == "creditcard")
-			{
-				//Faz pagamento...
-			}
-			else if (paymentMethod == "paypal")
-			{
-				//Faz pagamento...
-			}
+            await payment.PayOrder();
+            
+            DateTime dtNow = DateTime.Now;
+            DateTime dtOrder = new DateTime(dtNow.Year, dtNow.Month, dtNow.Day, dtNow.Hour, dtNow.Minute, dtNow.Second, DateTimeKind.Utc);
 
-			return await InsertOrder(new Order() //Retorna o pedido para o controller
+            var order  = await InsertOrder(new Order() //Retorna o pedido para o controller
             {
-                Value = paymentValue
+                CustomerId = customerId,
+                Value = paymentValue,
+                OrderDate = DateTime.Now,
             });
 
-
+            order.OrderDate = order.OrderDate.AddHours(-3);  //Retorna a data em UTC-3
+            return order;
 		}
 
-		public async Task<Order> InsertOrder(Order order)
+        public async Task<Order> InsertOrder(Order order)
         {
 			//Insere pedido no banco de dados
 			return (await _ctx.Orders.AddAsync(order)).Entity;

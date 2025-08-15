@@ -21,7 +21,7 @@ namespace ProvaPub.Controllers
 	public class Parte3Controller :  ControllerBase
 	{
 		[HttpGet("orders")]
-		public async Task<Order> PlaceOrder(string paymentMethod, decimal paymentValue, int customerId)
+		public async Task<Order> PlaceOrder(PaymentBase payment, decimal paymentValue, int customerId)
 		{
             var contextOptions = new DbContextOptionsBuilder<TestDbContext>()
     .UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=Teste;Trusted_Connection=True;")
@@ -29,7 +29,7 @@ namespace ProvaPub.Controllers
 
             using var context = new TestDbContext(contextOptions);
 
-            return await new OrderService(context).PayOrder(paymentMethod, paymentValue, customerId);
+            return await new OrderService(context).PayOrder(payment, paymentValue, customerId);
 		}
 	}
 }
