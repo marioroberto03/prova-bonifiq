@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ProvaPub.Extensions;
+using Microsoft.EntityFrameworkCore;
 using ProvaPub.Models;
 using ProvaPub.Repository;
 
@@ -15,18 +16,13 @@ namespace ProvaPub.Services
 
         public CustomerList ListCustomers(int page)
         {
-            int totalCount = 10;
-            int SizePg = totalCount * (page - 1);
-
             return new CustomerList()
             {
-                HasNext = false,
-                TotalCount = 10,
-                Customers = _ctx.Customers.Skip(SizePg).Take(totalCount).ToList()
+                Customers = _ctx.Customers.AsQueryable().ToPagedResultAsync(page).Result.Items,
             };
         }
 
-        public async Task<bool> CanPurchase(int customerId, decimal purchaseValue)
+        public async Task<bool> CanPurchase(int customerId, decimal purchaseValue, DateTime dtAtual)
         {
             if (customerId <= 0) throw new ArgumentOutOfRangeException(nameof(customerId));
 
@@ -37,7 +33,7 @@ namespace ProvaPub.Services
             if (customer == null) throw new InvalidOperationException($"Customer Id {customerId} does not exists");
 
             //Business Rule: A customer can purchase only a single time per month
-            var baseDate = DateTime.UtcNow.AddMonths(-1);
+            var baseDate = dtAtual.AddMonths(-1);
             var ordersInThisMonth = await _ctx.Orders.CountAsync(s => s.CustomerId == customerId && s.OrderDate >= baseDate);
             if (ordersInThisMonth > 0)
                 return false;
@@ -48,7 +44,7 @@ namespace ProvaPub.Services
                 return false;
 
             //Business Rule: A customer can purchases only during business hours and working days
-            if (DateTime.UtcNow.Hour < 8 || DateTime.UtcNow.Hour > 18 || DateTime.UtcNow.DayOfWeek == DayOfWeek.Saturday || DateTime.UtcNow.DayOfWeek == DayOfWeek.Sunday)
+            if (dtAtual.Hour < 8 || dtAtual.Hour > 18 || dtAtual.DayOfWeek == DayOfWeek.Saturday || dtAtual.DayOfWeek == DayOfWeek.Sunday)
                 return false;
 
 

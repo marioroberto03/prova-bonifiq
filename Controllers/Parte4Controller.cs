@@ -29,7 +29,7 @@ namespace ProvaPub.Controllers
 		{
 			CustomerService svc = new CustomerService(_ctx);
 
-			return await svc.CanPurchase(customerId, purchaseValue);
+            return await svc.CanPurchase(customerId, purchaseValue, DateTime.UtcNow);
 		}
 	}
 }
