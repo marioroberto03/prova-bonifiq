@@ -5,8 +5,8 @@ namespace ProvaPub.Controllers
 {
 	/// <summary>
 	/// Ao rodar o código abaixo o serviço deveria sempre retornar um número diferente, mas ele fica retornando sempre o mesmo número.
-	/// ok 1 - Faça as alterações para que o retorno seja sempre diferente
-	/// ok 2 - Tome cuidado 
+	/// 1 - Faça as alterações para que o retorno seja sempre diferente
+	/// 2 - Tome cuidado 
 	///		 -- o valor de retorno deve ser o que foi inserido no banco
 	/// </summary>
 	[ApiController]

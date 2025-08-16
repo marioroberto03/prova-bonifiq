@@ -1,4 +1,5 @@
-﻿using ProvaPub.Models;
+﻿using ProvaPub.Interface;
+using ProvaPub.Models;
 using ProvaPub.Repository;
 
 namespace ProvaPub.Services
@@ -6,34 +7,33 @@ namespace ProvaPub.Services
 	public class OrderService
 	{
         TestDbContext _ctx;
+        IPaymentService _Payment;
 
-        public OrderService(TestDbContext ctx)
+        public OrderService(TestDbContext ctx, IPaymentService payment)
         {
             _ctx = ctx;
+            _Payment = payment;
         }
 
-        public async Task<Order> PayOrder(PaymentBase payment, decimal paymentValue, int customerId)
+        public async Task<Order> PayOrder(Order order)
 		{
-            await payment.PayOrder();
-            
-            DateTime dtNow = DateTime.Now;
-            DateTime dtOrder = new DateTime(dtNow.Year, dtNow.Month, dtNow.Day, dtNow.Hour, dtNow.Minute, dtNow.Second, DateTimeKind.Utc);
-
-            var order  = await InsertOrder(new Order() //Retorna o pedido para o controller
+            if (await _Payment.PayOrder(order))
             {
-                CustomerId = customerId,
-                Value = paymentValue,
-                OrderDate = DateTime.Now,
-            });
+                order.OrderDate = DateTime.UtcNow;
 
-            order.OrderDate = order.OrderDate.AddHours(-3);  //Retorna a data em UTC-3
+                await InsertOrder(order);
+
+                order.OrderDate = order.OrderDate.AddHours(-3);
+            }
+
             return order;
 		}
 
         public async Task<Order> InsertOrder(Order order)
         {
-			//Insere pedido no banco de dados
-			return (await _ctx.Orders.AddAsync(order)).Entity;
+            var entity = (await _ctx.Orders.AddAsync(order)).Entity;
+            await _ctx.SaveChangesAsync();
+            return entity;
         }
 	}
 }

@@ -1,11 +1,14 @@
 ﻿
+using ProvaPub.Interface;
+using ProvaPub.Models;
+
 namespace ProvaPub.Services
 {
-    public class PaymentCreditCard : PaymentBase
+    public class PaymentCreditCard : IPaymentService
     {
-        public override Task<bool> PayOrder()
+        public Task<bool> PayOrder(Order order)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(true);
         }
     }
 }
